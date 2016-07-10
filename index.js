@@ -7,11 +7,18 @@ genetic.select1 = Genetic.Select1.Tournament2;
 genetic.select2 = Genetic.Select2.Tournament2;
 
 genetic.seed = function () {
-
+  var randomSolution = [];
+  for (var i = 0; i < 9; i++) {
+    randomSolution[i] = [];
+    for (var j = 0; j < 9; j++) {
+      randomSolution[i][j] = Math.floor(Math.random()*9+1); 
+    }
+  }  
+  return randomSolution;
 }
 
-genetic.mutate = function (entity) {
-
+genetic.mutate = function (entity) {  
+  
 }
 
 genetic.crossover = function (mother, father) {
