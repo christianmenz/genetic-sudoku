@@ -17,24 +17,29 @@ genetic.seed = function () {
   return randomSolution;
 }
 
-genetic.mutate = function (entity) {  
-  
+/*genetic.mutate = function (entity) {  
+
 }
 
 genetic.crossover = function (mother, father) {
 
-}
+}*/
 
 genetic.fitness = function (entity) {
+  var fitness = 0;
+  // very, very simple idea: go through rows/columns and add up all the correct ones.
 
+  return fitness;
 }
 
-genetic.generation = function (pop, generation, stats) {
+/*genetic.generation = function (pop, generation, stats) {
 
-}
+}*/
 
 genetic.notification = function (pop, generation, stats, isFinished) {
-
+  if (isFinished) {
+    console.log(pop[0].entity);
+  }
 }
 
 var config = {
