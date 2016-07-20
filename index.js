@@ -25,11 +25,14 @@ genetic.seed = function () {
   return randomSolution;
 }
 
-genetic.mutate = function (entity) {    
+genetic.mutate = function (entity) {
   var i = Math.floor(Math.random() * 9);
   var j = Math.floor(Math.random() * 9);
 
-  entity[i][j] = Math.floor(Math.random() * 9 + 1); 
+  // avoid mutation on the fixed values
+  if (!this.userData.sudoku[i][j]) {
+    entity[i][j] = Math.floor(Math.random() * 9 + 1);
+  }
   return entity;
 }
 
@@ -49,6 +52,7 @@ genetic.crossover = function (mother, father) {
 }
 
 genetic.fitness = function (entity) {
+  const FITNESS_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256]; // why I can not access the global variable?
   var fitness = 0;
 
   for (var i = 0; i < 9; i++) {
@@ -62,10 +66,18 @@ genetic.fitness = function (entity) {
       rowFitness = calculateFitness(rowFitness, rowVal);
       columnFitness = calculateFitness(columnFitness, colVal);
     }
-    fitness += rowFitness;
-    fitness += columnFitness;
 
+    // Avoid higher values to be more valuable, every number set is worth 1 point
+    for (var n = 0; n < FITNESS_VALUES.length; n++) {
+      if ((rowFitness & FITNESS_VALUES[n]) === FITNESS_VALUES[n]) {
+        fitness += 1;
+      }
+      if ((columnFitness & FITNESS_VALUES[n]) === FITNESS_VALUES[n]) {
+        fitness += 1;
+      }
+    }
   }
+
   return fitness;
 }
 
@@ -76,17 +88,18 @@ genetic.fitness = function (entity) {
 genetic.notification = function (pop, generation, stats, isFinished) {
   if (isFinished) {
     console.log(pop[0].entity);
-    console.log(stats); // 9198 would be a perfect solution
+    console.log(stats); // 162 would be a perfect solution, np?
   }
 }
 
 var config = {
-  "iterations": 8000
-  , "size": 500
+  "iterations": 400
+  , "size": 250
   , "crossover": 0.4
-  , "mutation": 0.6
+  , "mutation": 0.7
   , "skip": 20
-  , "webWorkers": true,  
+  , "webWorkers": true
+  , "fittestAlwaysSurvives": true
 };
 
 var userData = {
