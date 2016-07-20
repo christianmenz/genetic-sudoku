@@ -1,6 +1,12 @@
 Genetic = require('genetic-js');
 _ = require('lodash');
 
+const FITNESS_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256];
+
+calculateFitness = function (fitness, value) {
+  return fitness | FITNESS_VALUES[value - 1];
+}
+
 var genetic = Genetic.create();
 
 genetic.optimize = Genetic.Optimize.Maximize;
@@ -9,8 +15,8 @@ genetic.select2 = Genetic.Select2.Tournament2;
 
 genetic.seed = function () {
   var randomSolution = _.cloneDeep(this.userData.sudoku);
-  for (var i = 0; i < 9; i++) {    
-    for (var j = 0; j < 9; j++) {    
+  for (var i = 0; i < 9; i++) {
+    for (var j = 0; j < 9; j++) {
       if (randomSolution[i][j] === null) {
         randomSolution[i][j] = Math.floor(Math.random() * 9 + 1);
       }
@@ -19,18 +25,47 @@ genetic.seed = function () {
   return randomSolution;
 }
 
-/*genetic.mutate = function (entity) {  
+genetic.mutate = function (entity) {    
+  var i = Math.floor(Math.random() * 9);
+  var j = Math.floor(Math.random() * 9);
 
+  entity[i][j] = Math.floor(Math.random() * 9 + 1); 
+  return entity;
 }
 
 genetic.crossover = function (mother, father) {
-
-}*/
+  var daughter = [];
+  var son = [];
+  for (var i = 0; i < 9; i++) {
+    if (i % 2 == 0) {
+      son[i] = mother[i];
+      daughter[i] = father[i];
+    } else {
+      son[i] = father[i];
+      daughter[i] = mother[i];
+    }
+  }
+  return [son, daughter];
+}
 
 genetic.fitness = function (entity) {
   var fitness = 0;
-  // very, very simple idea: go through rows/columns and add up all the correct ones.
 
+  for (var i = 0; i < 9; i++) {
+    var rowFitness = 0;
+    var columnFitness = 0;
+
+    for (var j = 0; j < 9; j++) {
+      var rowVal = entity[i][j];
+      var colVal = entity[j][i];
+
+      rowFitness = calculateFitness(rowFitness, rowVal);
+      columnFitness = calculateFitness(columnFitness, colVal);
+    }
+    fitness += rowFitness;
+    fitness += columnFitness;
+
+  }
   return fitness;
 }
 
@@ -41,15 +76,17 @@ genetic.fitness = function (entity) {
 genetic.notification = function (pop, generation, stats, isFinished) {
   if (isFinished) {
     console.log(pop[0].entity);
+    console.log(stats); // 9198 would be a perfect solution
   }
 }
 
 var config = {
-  "iterations": 4000
-  , "size": 250
-  , "crossover": 0.3
-  , "mutation": 0.3
+  "iterations": 8000
+  , "size": 500
+  , "crossover": 0.4
+  , "mutation": 0.6
   , "skip": 20
+  , "webWorkers": true,  
 };
 
 var userData = {
