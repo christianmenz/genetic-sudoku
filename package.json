@@ -10,6 +10,7 @@
   "author": "christianmenz",
   "license": "MIT",
   "dependencies": {
-    "genetic-js": "^0.1.14"
+    "genetic-js": "^0.1.14",
+    "lodash": "^4.13.1"
   }
 }
