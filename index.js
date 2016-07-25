@@ -1,7 +1,7 @@
 Genetic = require('genetic-js');
 _ = require('lodash');
 
-const FITNESS_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256];
+FITNESS_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256];
 
 calculateFitness = function (fitness, value) {
   return fitness | FITNESS_VALUES[value - 1];
@@ -10,8 +10,8 @@ calculateFitness = function (fitness, value) {
 var genetic = Genetic.create();
 
 genetic.optimize = Genetic.Optimize.Maximize;
-genetic.select1 = Genetic.Select1.Tournament2;
-genetic.select2 = Genetic.Select2.Tournament2;
+genetic.select1 = Genetic.Select1.Tournament3;
+genetic.select2 = Genetic.Select2.Tournament3;
 
 genetic.seed = function () {
   var randomSolution = _.cloneDeep(this.userData.sudoku);
@@ -37,22 +37,18 @@ genetic.mutate = function (entity) {
 }
 
 genetic.crossover = function (mother, father) {
-  var daughter = [];
-  var son = [];
-  for (var i = 0; i < 9; i++) {
-    if (i % 2 == 0) {
-      son[i] = mother[i];
-      daughter[i] = father[i];
-    } else {
-      son[i] = father[i];
-      daughter[i] = mother[i];
-    }
-  }
+  var daughter = mother;
+  var son = daughter;
+  var fatherRow = Math.floor(Math.random() * 9);
+  var motherRow = Math.floor(Math.random() * 9);
+
+  son[fatherRow] = mother[motherRow];
+  daughter[motherRow] = father[fatherRow];
+
   return [son, daughter];
 }
 
 genetic.fitness = function (entity) {
-  const FITNESS_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256]; // why I can not access the global variable?
   var fitness = 0;
 
   for (var i = 0; i < 9; i++) {
@@ -77,26 +73,27 @@ genetic.fitness = function (entity) {
       }
     }
   }
+  // TODO fitness for 3*3 blocks
 
   return fitness;
 }
 
-/*genetic.generation = function (pop, generation, stats) {
-
-}*/
+genetic.generation = function (pop, generation, stats) {
+  return stats.maximum <= 162;
+}
 
 genetic.notification = function (pop, generation, stats, isFinished) {
   if (isFinished) {
     console.log(pop[0].entity);
-    console.log(stats); // 162 would be a perfect solution, np?
+    console.log(stats);
   }
 }
 
 var config = {
-  "iterations": 400
+  "iterations": 1000
   , "size": 250
-  , "crossover": 0.4
-  , "mutation": 0.7
+  , "crossover": 0.1
+  , "mutation": 0.8
   , "skip": 20
   , "webWorkers": true
   , "fittestAlwaysSurvives": true
